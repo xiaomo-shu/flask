@@ -1,5 +1,5 @@
 # coding=utf-8
-
+from flask import current_app
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
@@ -23,6 +23,22 @@ def index():
 
     # 测试session
     # session['name'] = 'itheima'
+
+    # 演示日志输出
+    # import logging
+    # logging.fatal('Fatal Message')
+    # logging.error('Error Message')
+    # logging.warning('Warning Message')
+    # logging.info('Info Message')
+    # logging.debug('Debug Message')
+
+    # 演示flask项目中输出日志
+    current_app.logger.fatal('Fatal Message')
+    current_app.logger.error('Error Message')
+    current_app.logger.warning('Warning Message')
+    current_app.logger.info('Info Message')
+    current_app.logger.debug('Debug Message')
+
     return 'index'
 
 if __name__ == '__main__':
