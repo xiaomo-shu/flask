@@ -1,3 +1,4 @@
+import logging
 import redis
 
 
@@ -32,13 +33,16 @@ class DevelopmentConfig(Config):
     """开发环境中的配置类"""
     # 开启调试模式
     DEBUG = True
+    # 开发环境中的日志等级
+    LOG_LEVEL = logging.DEBUG
 
 
 class ProductionConfig(Config):
     """生产环境(线上)中配置类"""
     # 配置生产环境中使用的配置类
     SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@172.16.179.139:3306/info'
-
+    # 生产环境中的日志等级
+    LOG_LEVEL = logging.WARNING
 
 config_dict = {
     'development': DevelopmentConfig,
