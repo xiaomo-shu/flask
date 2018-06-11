@@ -7,6 +7,9 @@ from flask_session import Session
 
 from config import config_dict
 
+# 创建SQLAlchemy的对象
+db = SQLAlchemy()
+
 
 # 工厂方法
 def create_app(config_name):
@@ -19,8 +22,8 @@ def create_app(config_name):
     # 从配置类中加载配置信息
     app.config.from_object(config_cls)
 
-    # 创建SQLAlchemy的对象
-    db = SQLAlchemy(app)
+    # db对象关联app
+    db.init_app(app)
 
     # 创建redis链接对象
     redis_store = redis.StrictRedis(host=config_cls.REDIS_HOST, port=config_cls.REDIS_PORT)
