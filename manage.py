@@ -2,11 +2,15 @@
 import redis
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 
 
 class Config(object):
     """项目的配置类"""
     DEBUG = True
+
+    # 设置SECRET_KEY
+    SECRET_KEY = 'NmwKKxmKOSZrjTGVOI04o9RBj0/t3hcYDHFQ7TDD7zr803t+qMuKciveDNrot1Qd'
 
     # 数据库相关配置
     # 设置数据库的链接地址
@@ -33,11 +37,17 @@ db = SQLAlchemy(app)
 # 创建redis链接对象
 redis_store = redis.StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT)
 
+# 为Flask项目开启CSRF保护
+# CSRFProtect只做保护验证工作，所有我们之后需要自己完成2步:
+# 1. 生成crsf_token
+# 2. 告诉浏览器生成的csrf_token
+CSRFProtect(app)
 
-@app.route('/')
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
     # 测试redis
-    redis_store.set('name', 'itcast')
+    # redis_store.set('name', 'itcast')
     return 'index'
 
 if __name__ == '__main__':
