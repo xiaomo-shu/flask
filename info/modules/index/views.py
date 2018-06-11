@@ -26,4 +26,6 @@ def index():
     # current_app.logger.info('Info Message')
     # current_app.logger.debug('Debug Message')
 
+    # TODO 要做的工作
+
     return 'index'
