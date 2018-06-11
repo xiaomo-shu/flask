@@ -9,10 +9,11 @@ from flask_wtf.csrf import CSRFProtect
 from flask_session import Session
 
 from config import config_dict
-from info.modules.index import index_blu
 
 # 创建SQLAlchemy的对象
 db = SQLAlchemy()
+
+redis_store = None
 
 
 def setup_logging(log_level):
@@ -46,6 +47,7 @@ def create_app(config_name):
     db.init_app(app)
 
     # 创建redis链接对象
+    global redis_store
     redis_store = redis.StrictRedis(host=config_cls.REDIS_HOST, port=config_cls.REDIS_PORT)
 
     # 为Flask项目开启CSRF保护
@@ -59,6 +61,7 @@ def create_app(config_name):
     Session(app)
 
     # 3. 使用app对象注册蓝图
+    from info.modules.index import index_blu
     app.register_blueprint(index_blu)
 
     return app

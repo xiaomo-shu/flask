@@ -1,11 +1,12 @@
 from . import index_blu
+from info import redis_store
 
 
 # 2. 使用蓝图对象注册路由
 @index_blu.route('/', methods=['GET', 'POST'])
 def index():
     # 测试redis
-    # redis_store.set('name', 'itcast')
+    redis_store.set('name', 'itcast')
 
     # 测试session
     # session['name'] = 'itheima'
