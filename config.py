@@ -39,3 +39,8 @@ class ProductionConfig(Config):
     # 配置生产环境中使用的配置类
     SQLALCHEMY_DATABASE_URI = 'mysql://root:mysql@172.16.179.139:3306/info'
 
+
+config_dict = {
+    'development': DevelopmentConfig,
+    'production': ProductionConfig
+}
