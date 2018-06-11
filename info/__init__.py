@@ -9,6 +9,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_session import Session
 
 from config import config_dict
+from info.modules.index import index_blu
 
 # 创建SQLAlchemy的对象
 db = SQLAlchemy()
@@ -56,5 +57,8 @@ def create_app(config_name):
     # pip install flask-session
     # session存储设置
     Session(app)
+
+    # 3. 使用app对象注册蓝图
+    app.register_blueprint(index_blu)
 
     return app
