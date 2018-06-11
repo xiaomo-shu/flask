@@ -1,8 +1,10 @@
 # coding=utf-8
 import redis
+from flask import session
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
+from flask_session import Session
 
 
 class Config(object):
@@ -21,6 +23,16 @@ class Config(object):
     # redis数据库的相关配置
     REDIS_HOST = '172.16.179.139'
     REDIS_PORT = 6379
+
+    # session存储的相关配置
+    # 设置session存储到redis中
+    SESSION_TYPE = 'redis'
+    # redis链接对象(给flask-session扩展使用的)
+    SESSION_REDIS = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT)
+    # 开启返回给浏览器cookie `session`值的加密
+    SESSION_USE_SIGNER = True
+    # 设置session过期时间
+    PERMANENT_SESSION_LIFETIME = 24*3600*2
 
 
 # 创建Flask应用程序实例
@@ -43,11 +55,18 @@ redis_store = redis.StrictRedis(host=Config.REDIS_HOST, port=Config.REDIS_PORT)
 # 2. 告诉浏览器生成的csrf_token
 CSRFProtect(app)
 
+# pip install flask-session
+# session存储设置
+Session(app)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     # 测试redis
     # redis_store.set('name', 'itcast')
+
+    # 测试session
+    session['name'] = 'itheima'
     return 'index'
 
 if __name__ == '__main__':
