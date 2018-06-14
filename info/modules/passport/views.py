@@ -137,11 +137,11 @@ def send_sms_code():
         current_app.logger.error(e)
         return jsonify(errno=RET.DBERR, errmsg='保存短信验证码失败')
 
-    # 4.3 使用云通讯平台发送短信
-    res = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES/60], 1)
-
-    if res != 0:
-        return jsonify(errno=RET.THIRDERR, errmsg='发送短信失败')
+    # 4.3 使用云通讯平台发送短信 13155667788
+    # res = CCP().send_template_sms(mobile, [sms_code, constants.SMS_CODE_REDIS_EXPIRES/60], 1)
+    #
+    # if res != 0:
+    #     return jsonify(errno=RET.THIRDERR, errmsg='发送短信失败')
 
     # 5. 返回应答，发送短信成功
     return jsonify(errno=RET.OK, errmsg='发送短信成功')

@@ -160,6 +160,25 @@ $(function(){
         };
 
         // TODO 发起注册请求
+        $.ajax({
+            url: '/passport/register',
+            type: 'post',
+            contentType: 'application/json',
+            data: JSON.stringify(params),
+            dataType: 'json',
+            success: function (resp) {
+                if (resp.errno == '0') {
+                    // `注册`成功
+                    // 刷新当前页面
+                    location.reload();
+                }
+                else {
+                    // `注册`失败
+                    // 在页面上显示错误信息
+                    $('#register-password-err').html(resp.errmsg).show();
+                }
+            }
+        })
 
     });
 
