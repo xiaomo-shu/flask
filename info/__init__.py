@@ -63,6 +63,8 @@ def create_app(config_name):
 
     # 3. 使用app对象注册蓝图
     from info.modules.index import index_blu
+    from info.modules.passport import passport_blu
     app.register_blueprint(index_blu)
+    app.register_blueprint(passport_blu, url_prefix='/passport')
 
     return app
