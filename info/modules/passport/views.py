@@ -17,7 +17,7 @@ from info.utils.captcha.captcha import captcha
 from info.libs.yuntongxun.sms import CCP
 
 
-@passport_blu.route('/sms_code')
+@passport_blu.route('/sms_code', methods=['POST'])
 def send_sms_code():
     """
     发送短信验证码:

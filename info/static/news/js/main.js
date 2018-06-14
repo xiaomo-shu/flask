@@ -212,6 +212,28 @@ function sendSMSCode() {
     };
 
     // TODO 发送ajax请求，请求发送短信验证码
+    $.ajax({
+        url: '/passport/sms_code',  // 请求的url地址
+        type: 'post', // 请求方式，默认'get'
+        contentType: 'application/json', // 指定给服务器发送数据的类型
+        data: JSON.stringify(params), // 给服务器传递的数据
+        dataType: 'json', // 服务器返回的数据的类型
+        success: function (resp) {
+            // 回调函数
+            // alert('发送短信');
+            // console.log(resp);
+            if (resp.errno == '0') {
+                // `发送短信`成功
+                alert('发送短信成功');
+            }
+            else {
+                // `发送短信`失败
+                $("#register-sms-code-err").html(resp.errmsg).show();
+                // 给`点击获取验证码`a标签添加点击事件
+                $(".get_code").attr("onclick", "sendSMSCode();");
+            }
+        }
+    })
 
 }
 

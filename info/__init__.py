@@ -49,13 +49,13 @@ def create_app(config_name):
 
     # 创建redis链接对象
     global redis_store
-    redis_store = redis.StrictRedis(host=config_cls.REDIS_HOST, port=config_cls.REDIS_PORT)
+    redis_store = redis.StrictRedis(host=config_cls.REDIS_HOST, port=config_cls.REDIS_PORT, decode_responses=True)
 
     # 为Flask项目开启CSRF保护
     # CSRFProtect只做保护验证工作，所有我们之后需要自己完成2步:
     # 1. 生成crsf_token
     # 2. 告诉浏览器生成的csrf_token
-    CSRFProtect(app)
+    # CSRFProtect(app)
 
     # pip install flask-session
     # session存储设置
