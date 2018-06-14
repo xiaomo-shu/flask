@@ -178,6 +178,7 @@ function generateImageCode() {
     imageCodeId = generateUUID();
 
     // 获取图片验证码img标签并设置它的src属性
+    // prop
     $('.get_pic_code').attr('src', '/passport/image_code?image_code_id=' + imageCodeId);
 }
 
