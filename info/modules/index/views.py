@@ -1,3 +1,6 @@
+from flask import current_app
+from flask import render_template
+
 from . import index_blu
 from info import redis_store
 
@@ -28,4 +31,16 @@ def index():
 
     # TODO 要做的工作
 
-    return 'index'
+    # return 'index'
+
+    return render_template('news/index.html')
+
+
+# 当浏览器访问一个网站时，会默认访问网站下的路径/favicon.ico
+# 目的就是获取网站图标文件
+@index_blu.route('/favicon.ico')
+def get_web_ico():
+    """获取网站的图标"""
+    # current_app.send_static_file: 获取静态目录下文件的内容
+    # current_app.send_static_file('news/html/user.html')
+    return current_app.send_static_file('news/favicon.ico')

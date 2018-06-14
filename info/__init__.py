@@ -10,6 +10,7 @@ from flask_session import Session
 
 from config import config_dict
 
+
 # 创建SQLAlchemy的对象
 db = SQLAlchemy()
 
