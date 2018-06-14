@@ -67,6 +67,8 @@ def send_sms_code():
     # 4. 使用云通讯给`手机号mobile`发送短信验证码
     # 4.1 随机生成一个6位数字
     sms_code = '%06d' % random.randint(0, 999999) # 000100
+    current_app.logger.info('短信验证码为: %s' % sms_code)
+
 
     # 4.2 在redis中存储短信验证码内容，以`手机号mobile`为key，以`短信验证码内容`为value
     try:
@@ -104,6 +106,7 @@ def get_image_code():
     # 2. 产生图片验证码
     # 图片名称 验证码文本 验证码图片内容
     name, text, content = captcha.generate_captcha()
+    current_app.logger.info('图片验证码为: %s' % text)
 
     # 3. 在redis中保存验证码文本，以`图片验证码标识`为key，以验证码文本为value
     try:

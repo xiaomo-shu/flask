@@ -224,7 +224,26 @@ function sendSMSCode() {
             // console.log(resp);
             if (resp.errno == '0') {
                 // `发送短信`成功
-                alert('发送短信成功');
+                // 倒计时60s
+                var num = 60;
+                var tid = setInterval(function () {
+                    if (num <= 0) {
+                        // 倒计时完成
+                        // 清除定时器
+                        clearInterval(tid);
+                        // 重置`点击获取验证码`内容
+                        $('.get_code').html('点击获取验证码');
+                        // 给`点击获取验证码`添加点击事件
+                        $(".get_code").attr("onclick", "sendSMSCode();");
+                    }
+                    else {
+                        // 在页面上提示倒计时剩余秒数
+                        $('.get_code').html(num+'秒');
+                        // 倒计时剩余秒数减1
+                        num -= 1;
+                    }
+
+                }, 1000);
             }
             else {
                 // `发送短信`失败
