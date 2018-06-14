@@ -6,7 +6,8 @@ from flask import abort, jsonify
 from flask import current_app
 from flask import request
 
-from info import constants
+from info import constants, db
+from info.models import User
 from info.utils.response_code import RET
 from . import passport_blu
 
@@ -15,6 +16,66 @@ from flask import make_response
 from info import redis_store
 from info.utils.captcha.captcha import captcha
 from info.libs.yuntongxun.sms import CCP
+
+
+@passport_blu.route('/register', methods=['POST'])
+def register():
+    """
+    用户注册:
+    1. 接收参数(手机号，短信验证码，密码)并进行参数校验
+    2. 根据`手机号`获取redis中短信验证码文本(如果取不到，说明短信验证码过期)
+    3. 对比短信验证码，如果一致
+    4. 创建User对象并保存注册用户的信息
+    5. 将用户的注册信息添加进数据库
+    6. 返回应答，注册成功
+    """
+    # 1. 接收参数(手机号，短信验证码，密码)并进行参数校验
+    req_dict = request.json
+
+    if not req_dict:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    mobile = req_dict.get('mobile')
+    sms_code = req_dict.get('sms_code')
+    password = req_dict.get('password')
+
+    if not all([mobile, sms_code, password]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+    if not re.match(r'^1[3-9]\d{9}$', mobile):
+        return jsonify(errno=RET.PARAMERR, errmsg='手机号格式不正确')
+
+    # 2. 根据`手机号`获取redis中短信验证码文本(如果取不到，说明短信验证码过期)
+    try:
+        real_sms_code = redis_store.get('sms_code:%s' % mobile)  # None
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='获取短信验证码失败')
+
+    if not real_sms_code:
+        return jsonify(errno=RET.NODATA, errmsg='短信验证码已过期')
+
+    # 3. 对比短信验证码，如果一致
+    if real_sms_code != sms_code:
+        return jsonify(errno=RET.DATAERR, errmsg='短信验证码错误')
+
+    # 4. 创建User对象并保存注册用户的信息
+    user = User()
+    user.mobile = mobile
+    user.nick_name = mobile # 昵称默认为`手机号`
+    user.password = password
+
+    # 5. 将用户的注册信息添加进数据库
+    try:
+        db.session.add(user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='保存注册用户信息失败')
+
+    # 6. 返回应答，注册成功
+    return jsonify(errno=RET.OK, errmsg='注册成功')
 
 
 @passport_blu.route('/sms_code', methods=['POST'])
@@ -68,7 +129,6 @@ def send_sms_code():
     # 4.1 随机生成一个6位数字
     sms_code = '%06d' % random.randint(0, 999999) # 000100
     current_app.logger.info('短信验证码为: %s' % sms_code)
-
 
     # 4.2 在redis中存储短信验证码内容，以`手机号mobile`为key，以`短信验证码内容`为value
     try:
