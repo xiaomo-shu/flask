@@ -19,6 +19,22 @@ from info.utils.captcha.captcha import captcha
 from info.libs.yuntongxun.sms import CCP
 
 
+@passport_blu.route('/logout', methods=['POST'])
+def logout():
+    """
+    退出登录:
+    1. 清除session中用户的登录状态数据
+    2. 返回应答，退出成功
+    """ 
+    # 1. 清除session中用户的登录状态数据
+    session.pop('user_id')
+    session.pop('mobile')
+    session.pop('nick_name')
+    
+    # 2. 返回应答，退出成功
+    return jsonify(errno=RET.OK, errmsg='退出登录成功')
+    
+
 @passport_blu.route('/login', methods=['POST'])
 def login():
     """

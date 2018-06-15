@@ -205,7 +205,17 @@ $(function(){
 
     // TODO 用户退出功能
     $('#logout').click(function () {
-
+        // 请求`退出登录`
+        $.ajax({
+            url: '/passport/logout',
+            type: 'post',
+            success: function (resp) {
+                if (resp.errno == '0') {
+                    // `退出登录`成功
+                    location.reload();
+                }
+            }
+        })
     })
 
 });
