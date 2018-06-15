@@ -6,6 +6,7 @@ from flask import session
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import generate_csrf
 from flask_session import Session
 
 from config import config_dict
@@ -53,13 +54,22 @@ def create_app(config_name):
 
     # 为Flask项目开启CSRF保护
     # CSRFProtect只做保护验证工作，所有我们之后需要自己完成2步:
-    # 1. 生成crsf_token
-    # 2. 告诉浏览器生成的csrf_token
-    # CSRFProtect(app)
+    # 1. 在服务器端生成crsf_token并且把它保存起来
+    # 2. 告诉浏览器生成的csrf_token，浏览器发起请求时需要把csrf_token带上
+    CSRFProtect(app)
 
     # pip install flask-session
     # session存储设置
     Session(app)
+
+    @app.after_request
+    def after_request(response):
+        # 1. 在服务器端生成crsf_token并且把它保存起来
+        csrf_token = generate_csrf()
+        # 2. 告诉浏览器生成的csrf_token
+        response.set_cookie('csrf_token', csrf_token)
+
+        return response
 
     # 3. 使用app对象注册蓝图
     from info.modules.index import index_blu

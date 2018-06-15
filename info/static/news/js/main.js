@@ -124,6 +124,9 @@ $(function(){
         $.ajax({
             url: '/passport/login',
             type: 'post',
+            headers: {
+                'X-CSRFToken': getCookie('csrf_token')
+            },
             contentType: 'application/json',
             data: JSON.stringify(params),
             dataType: 'json',
@@ -184,6 +187,9 @@ $(function(){
         $.ajax({
             url: '/passport/register',
             type: 'post',
+            headers: {
+                'X-CSRFToken': getCookie('csrf_token')
+            },
             contentType: 'application/json',
             data: JSON.stringify(params),
             dataType: 'json',
@@ -209,6 +215,10 @@ $(function(){
         $.ajax({
             url: '/passport/logout',
             type: 'post',
+            // 在发起post请求时，将csrf_token的值放在请求头中传递的服务器
+            headers: {
+                'X-CSRFToken': getCookie('csrf_token')
+            },
             success: function (resp) {
                 if (resp.errno == '0') {
                     // `退出登录`成功
@@ -265,6 +275,9 @@ function sendSMSCode() {
     $.ajax({
         url: '/passport/sms_code',  // 请求的url地址
         type: 'post', // 请求方式，默认'get'
+        headers: {
+            'X-CSRFToken': getCookie('csrf_token')
+        },
         contentType: 'application/json', // 指定给服务器发送数据的类型
         data: JSON.stringify(params), // 给服务器传递的数据
         dataType: 'json', // 服务器返回的数据的类型
