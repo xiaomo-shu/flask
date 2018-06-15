@@ -71,10 +71,61 @@ function updateNewsData() {
     var params = {
         "cid": currentCid,
         "page": cur_page,
-        "per_page": 50
+        "per_page": 10
     };
 
     // TODO 更新新闻数据
+    $.ajax({
+        url: '/news',
+        type: 'get',
+        data: params,
+        success: function (resp) {
+            // 设置`是否正在向后端请求数据标志`data_querying=false
+            data_querying = false;
+
+            if (resp.errno == '0') {
+                // 获取`分类新闻信息`成功
+                // 设置分页之后`总页数`
+                total_page = resp.total_page;
+
+                if (cur_page == 1) {
+                    // 首先清空页面原有的内容
+                    $(".list_con").html("");
+                }
+
+                // 获取返回的新闻信息
+                var news_li = resp.news_li;
+
+                // 遍历news_li获取每个新闻的信息并展示在页面上
+                for (var i=0; i < news_li.length; i++) {
+                    // 获取每个新闻信息
+                    var news = news_li[i];
+
+                    // 拼接新闻显示内容
+                    var content = '<li>';
+                    content += '<a href="#" class="news_pic fl"><img src="' + news.index_image_url + '?imageView2/1/w/170/h/170"></a>';
+                    content += '<a href="#" class="news_title fl">' + news.title + '</a>';
+                    content += '<a href="#" class="news_detail fl">' + news.digest + '</a>';
+                    content += '<div class="author_info fl">';
+                    content += '<div class="source fl">来源：' + news.source + '</div>';
+                    content += '<div class="time fl">' + news.create_time + '</div>';
+                    content += '</div>';
+                    content += '</li>';
+
+                    // 将新闻显示内容添加到首页上
+                    $(".list_con").append(content);
+                }
+
+                // 设置页码加1
+                cur_page += 1;
+            }
+            else
+            {
+                // 获取`分类新闻信息`失败
+                alert(resp.errmsg);
+            }
+        }
+    })
 
 
 }
