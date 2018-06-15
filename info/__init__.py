@@ -71,6 +71,10 @@ def create_app(config_name):
 
         return response
 
+    # 添加自定义的过滤器
+    from info.utils.commons import do_rank_class
+    app.add_template_filter(do_rank_class, 'rank_class')
+
     # 3. 使用app对象注册蓝图
     from info.modules.index import index_blu
     from info.modules.passport import passport_blu
