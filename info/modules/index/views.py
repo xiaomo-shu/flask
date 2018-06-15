@@ -3,7 +3,7 @@ from flask import render_template
 from flask import session
 
 from info import constants
-from info.models import User, News
+from info.models import User, News, Category
 from . import index_blu
 from info import redis_store
 
@@ -30,10 +30,18 @@ def index():
     except Exception as e:
         current_app.logger.error(e)
 
+    # 获取`新闻分类`的信息
+    categories = []
+    try:
+        categories = Category.query.all()
+    except Exception as e:
+        current_app.logger.error(e)
+
     # 使用模板
     return render_template('news/index.html',
                            user=user,
-                           rank_news_li=rank_news_li)
+                           rank_news_li=rank_news_li,
+                           categories=categories)
 
 
 # 当浏览器访问一个网站时，会默认访问网站下的路径/favicon.ico
