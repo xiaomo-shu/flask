@@ -5,6 +5,7 @@ import re
 from flask import abort, jsonify
 from flask import current_app
 from flask import request
+from flask import session
 
 from info import constants, db
 from info.models import User
@@ -16,6 +17,54 @@ from flask import make_response
 from info import redis_store
 from info.utils.captcha.captcha import captcha
 from info.libs.yuntongxun.sms import CCP
+
+
+@passport_blu.route('/login', methods=['POST'])
+def login():
+    """
+    用户登录:
+    1. 接收参数(手机号，密码)并进行参数校验
+    2. 根据`手机号`查询User信息(如果查不到，说明用户不存在)
+    3. 校验用户的`密码`是否正确
+    4. 记住用户的登录状态
+    5. 返回应答，登录成功
+    """
+    # 1. 接收参数(手机号，密码)并进行参数校验
+    req_dict = request.json
+
+    if not req_dict:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    mobile = req_dict.get('mobile')
+    password = req_dict.get('password')
+
+    if not all([mobile, password]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+    if not re.match(r'^1[3-9]\d{9}$', mobile):
+        return jsonify(errno=RET.PARAMERR, errmsg='手机号格式不正确')
+
+    # 2. 根据`手机号`查询User信息(如果查不到，说明用户不存在)
+    try:
+        user = User.query.filter(User.mobile == mobile).first()
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户信息失败')
+
+    if not user:
+        return jsonify(errno=RET.USERERR, errmsg='用户不存在')
+
+    # 3. 校验用户的`密码`是否正确
+    if not user.check_passowrd(password):
+        return jsonify(errno=RET.PWDERR, errmsg='登录密码错误')
+
+    # 4. 记住用户的登录状态
+    session['user_id'] = user.id
+    session['mobile'] = user.mobile
+    session['nick_name'] = user.nick_name
+
+    # 5. 返回应答，登录成功
+    return jsonify(errno=RET.OK, errmsg='登录成功')
 
 
 @passport_blu.route('/register', methods=['POST'])
