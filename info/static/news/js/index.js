@@ -10,10 +10,13 @@ $(function () {
 
     // 首页分类切换
     $('.menu li').click(function () {
+        // 获取点击分类的id
         var clickCid = $(this).attr('data-cid');
+
         $('.menu li').each(function () {
             $(this).removeClass('active');
         });
+
         $(this).addClass('active');
 
         if (clickCid != currentCid) {
