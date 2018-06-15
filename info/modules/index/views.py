@@ -1,6 +1,9 @@
 from flask import current_app
 from flask import render_template
+from flask import session
 
+from info import constants
+from info.models import User
 from . import index_blu
 from info import redis_store
 
@@ -8,32 +11,20 @@ from info import redis_store
 # 2. 使用蓝图对象注册路由
 @index_blu.route('/', methods=['GET', 'POST'])
 def index():
-    # 测试redis
-    redis_store.set('name', 'itcast')
+    # 尝试从session中获取user_id
+    user_id = session.get('user_id') # 获取不到，返回None
 
-    # 测试session
-    # session['name'] = 'itheima'
+    user = None
+    if user_id:
+        # 用户已登录
+        try:
+            user = User.query.get(user_id)
+            user.avatar_url = constants.QINIU_DOMIN_PREFIX + user.avatar_url
+        except Exception as e:
+            current_app.logger.error(e)
 
-    # 演示日志输出
-    # import logging
-    # logging.fatal('Fatal Message')
-    # logging.error('Error Message')
-    # logging.warning('Warning Message')
-    # logging.info('Info Message')
-    # logging.debug('Debug Message')
-
-    # 演示flask项目中输出日志
-    # current_app.logger.fatal('Fatal Message')
-    # current_app.logger.error('Error Message')
-    # current_app.logger.warning('Warning Message')
-    # current_app.logger.info('Info Message')
-    # current_app.logger.debug('Debug Message')
-
-    # TODO 要做的工作
-
-    # return 'index'
-
-    return render_template('news/index.html')
+    # 使用模板
+    return render_template('news/index.html', user=user)
 
 
 # 当浏览器访问一个网站时，会默认访问网站下的路径/favicon.ico
