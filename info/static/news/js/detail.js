@@ -100,6 +100,7 @@ $(function(){
     function updateCommentCount() {
         var length = $(".comment_list").length;
         $(".comment_count").html(length + "条评论");
+        $(".comment").html(length);
     }
 
     // 评论提交
@@ -161,6 +162,9 @@ $(function(){
                     $('.comment_sub').blur();
                     // 清空新闻评论输入框内容
                     $(".comment_input").val("");
+
+                    // 更新页面的新闻评论数量
+                    updateCommentCount();
                 }
                 else {
                     // `评论`失败
@@ -283,6 +287,9 @@ $(function(){
                         $this.prev().val('');
                         // 关闭
                         $this.parent().hide();
+
+                        // 更新页面的新闻评论数量
+                        updateCommentCount();
                     }
                     else {
                         // `回复评论`失败
