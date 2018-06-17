@@ -24,6 +24,32 @@ $(function(){
         };
 
         // TODO 请求收藏新闻
+        $.ajax({
+            url: "/news/collect",
+            type: "post",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // `收藏`成功
+                    // 隐藏`收藏`按钮
+                    $(".collection").hide();
+                    // 显示`已收藏`按钮
+                    $(".collected").show();
+                }
+                else if (resp.errno == "4101") {
+                    // 用户登录
+                    $(".login_form_con").show();
+                }
+                else {
+                    // `收藏`失败
+                    alert(resp.errmsg);
+                }
+            }
+        })
 
        
     });
@@ -41,7 +67,32 @@ $(function(){
         };
 
         // TODO 请求取消收藏新闻
-
+        $.ajax({
+            url: "/news/collect",
+            type: "post",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // `取消收藏`成功
+                    // 显示`收藏`按钮
+                    $(".collection").show();
+                    // 隐藏`已收藏`按钮
+                    $(".collected").hide();
+                }
+                else if (resp.errno == "4101") {
+                    // 用户登录
+                    $(".login_form_con").show();
+                }
+                else {
+                    // `收藏`失败
+                    alert(resp.errmsg);
+                }
+            }
+        })
 
     });
 
