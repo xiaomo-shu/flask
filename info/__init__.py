@@ -6,7 +6,6 @@ from flask import session
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
-from flask_wtf.csrf import generate_csrf
 from flask_session import Session
 
 from config import config_dict
@@ -65,6 +64,7 @@ def create_app(config_name):
     @app.after_request
     def after_request(response):
         # 1. 在服务器端生成crsf_token并且把它保存起来
+        from flask_wtf.csrf import generate_csrf
         csrf_token = generate_csrf()
         # 2. 告诉浏览器生成的csrf_token
         response.set_cookie('csrf_token', csrf_token)
@@ -78,7 +78,9 @@ def create_app(config_name):
     # 3. 使用app对象注册蓝图
     from info.modules.index import index_blu
     from info.modules.passport import passport_blu
+    from info.modules.news import news_blu
     app.register_blueprint(index_blu)
     app.register_blueprint(passport_blu, url_prefix='/passport')
+    app.register_blueprint(news_blu, url_prefix='/news')
 
     return app
