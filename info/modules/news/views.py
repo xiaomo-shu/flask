@@ -38,7 +38,8 @@ def save_news_comment():
         
     try:
         news_id = int(news_id)
-        parent_id = int(parent_id)
+        if parent_id:
+            parent_id = int(parent_id)
     except Exception as e:
         current_app.logger.error(e)
         return jsonify(errno=RET.PARAMERR, errmsg='参数错误')

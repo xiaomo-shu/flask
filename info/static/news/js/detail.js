@@ -104,7 +104,7 @@ $(function(){
 
     // 评论提交
     $(".comment_form").submit(function (e) {
-        // 组织表单默认提交行为
+        // 阻止表单默认提交行为
         e.preventDefault();
 
         // 获取参数
@@ -118,6 +118,25 @@ $(function(){
         };
 
         // TODO 请求对新闻`进行评论`
+        $.ajax({
+            url: "/news/comment",
+            type: "post",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            success: function (resp) {
+                if (resp.errno == '0') {
+                    // `评论`成功
+                    alert('评论成功');
+                }
+                else {
+                    // `评论`失败
+                    alert(resp.errmsg);
+                }
+            }
+        })
 
 
     });

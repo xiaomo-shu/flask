@@ -22,7 +22,7 @@
             <a href="javascript:;" class="collected block-center" data-news-id="{{ news.id }}" style="display: {% if is_collected %}block;{% else %}none;{% endif %}"><span class="out">已收藏</span><span class="over">取消收藏</span></a>
         {# 判断用户是否登录 #}
         {% if user %}
-        <form action="" class="comment_form" data-news-id="1">
+        <form action="" class="comment_form" data-news-id="{{ news.id }}">
             <div class="person_pic">
                 <img src="../../static/news/images/cat.jpg" alt="用户图标">
             </div>
