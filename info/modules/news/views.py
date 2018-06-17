@@ -12,6 +12,72 @@ from info.utils.response_code import RET
 from . import news_blu
 
 
+@news_blu.route('/comment', methods=['POST'])
+@login_required
+def save_news_comment():
+    """
+    评论新闻或回复评论:
+    1. 接收参数(news_id, content, parent_id)并进行参数校验
+    2. 根据`news_id`获取新闻的信息(如果查不到，说明新闻不存在)
+    3. 创建Comment对象并保存`评论`信息
+    4. 将`评论信息`添加进数据库
+    5. 返回应答，评论新闻或回复评论成功
+    """
+    # 1. 接收参数(news_id, content, parent_id)并进行参数校验
+    req_dict = request.json
+
+    if not req_dict:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    news_id = req_dict.get('news_id')
+    content = req_dict.get('content')
+    parent_id = req_dict.get('parent_id')
+
+    if not all([news_id, content]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+        
+    try:
+        news_id = int(news_id)
+        parent_id = int(parent_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 2. 根据`news_id`获取新闻的信息(如果查不到，说明新闻不存在)
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询新闻信息失败')
+
+    if not news:
+        return jsonify(errno=RET.NODATA, errmsg='新闻不存在')
+
+    # 3. 创建Comment对象并保存`评论`信息
+    comment = Comment()
+    comment.user_id = g.user.id
+    comment.news_id = news_id
+    comment.content = content
+
+    if parent_id:
+        comment.parent_id = parent_id
+
+    # 新闻评论数量+1
+    news.comments_count += 1
+
+    # 4. 将`评论信息`添加进数据库
+    try:
+        db.session.add(comment)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='保存评论信息失败')
+        
+    # 5. 返回应答，评论新闻或回复评论成功
+    return jsonify(errno=RET.OK, errmsg='OK')
+
+
 @news_blu.route('/collect', methods=['POST'])
 @login_required
 def news_collect():
