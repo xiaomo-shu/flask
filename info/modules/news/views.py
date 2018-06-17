@@ -6,7 +6,7 @@ from flask import request
 from flask import session
 
 from info import constants, db
-from info.models import User, News
+from info.models import User, News, Comment
 from info.utils.commons import login_user_data, login_required
 from info.utils.response_code import RET
 from . import news_blu
@@ -127,9 +127,17 @@ def get_news_detail(news_id):
             # 登录用户收藏了这个新闻
             is_collected = True
 
+    # 获取当前新闻的`评论信息`
+    comments_li = []
+    try:
+        comments_li = Comment.query.filter(Comment.news_id == news_id).order_by(Comment.create_time.desc()).all()
+    except Exception as e:
+        current_app.logger.error(e)
+
     # 使用模板
     return render_template('news/detail.html',
                            user=user,
                            news=news,
                            rank_news_li=rank_news_li,
-                           is_collected=is_collected)
+                           is_collected=is_collected,
+                           comments_li=comments_li)
