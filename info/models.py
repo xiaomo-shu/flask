@@ -63,6 +63,19 @@ class User(BaseModel, db.Model):
     # 当前用户所发布的新闻
     news_list = db.relationship('News', backref='user', lazy='dynamic')
 
+    def to_dict(self):
+        resp_dict = {
+            "id": self.id,
+            "nick_name": self.nick_name,
+            "avatar_url": constants.QINIU_DOMIN_PREFIX + self.avatar_url if self.avatar_url else "",
+            "mobile": self.mobile,
+            "gender": self.gender if self.gender else "MAN",
+            "signature": self.signature if self.signature else "",
+            "followers_count": self.followers.count(),
+            "news_count": self.news_list.count()
+        }
+        return resp_dict
+
     @property
     def password(self):
         raise AttributeError("当前属性不可读")

@@ -76,7 +76,7 @@ def save_news_comment():
         return jsonify(errno=RET.DBERR, errmsg='保存评论信息失败')
         
     # 5. 返回应答，评论新闻或回复评论成功
-    return jsonify(errno=RET.OK, errmsg='OK')
+    return jsonify(errno=RET.OK, errmsg='OK', comment=comment.to_dict())
 
 
 @news_blu.route('/collect', methods=['POST'])
