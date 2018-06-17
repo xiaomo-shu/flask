@@ -16,10 +16,10 @@
             </div>
             {# 新闻内容 #}
             {{ news.content|safe }}
-            
-        <a href="javascript:;" class="collection block-center" data-news-id="1">收藏</a>
-        <a href="javascript:;" class="collected block-center" data-news-id="1" style="display: none"><span class="out">已收藏</span><span class="over">取消收藏</span></a>
 
+            {# 显示收藏或取消收藏 #}
+            <a href="javascript:;" class="collection block-center" data-news-id="{{ news.id }}" style="display: {% if is_collected %}none;{% else %}block;{% endif %}">收藏</a>
+            <a href="javascript:;" class="collected block-center" data-news-id="{{ news.id }}" style="display: {% if is_collected %}block;{% else %}none;{% endif %}"><span class="out">已收藏</span><span class="over">取消收藏</span></a>
         {# 判断用户是否登录 #}
         {% if user %}
         <form action="" class="comment_form" data-news-id="1">

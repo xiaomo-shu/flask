@@ -59,8 +59,16 @@ def get_news_detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
 
+    # 判断用户｀是否收藏｀新闻
+    is_collected = False
+    if user:
+        if news in user.collection_news:
+            # 登录用户收藏了这个新闻
+            is_collected = True
+
     # 使用模板
     return render_template('news/detail.html',
                            user=user,
                            news=news,
-                           rank_news_li=rank_news_li)
+                           rank_news_li=rank_news_li,
+                           is_collected=is_collected)
