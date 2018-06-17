@@ -1,10 +1,11 @@
+from flask import abort
 from flask import current_app
 from flask import g
 from flask import render_template
 from flask import session
 
 from info import constants
-from info.models import User
+from info.models import User, News
 from info.utils.commons import login_user_data
 from . import news_blu
 
@@ -32,5 +33,17 @@ def get_news_detail(news_id):
     # 从g变量中获取user
     user = g.user
 
+    # 根据`news_id`获取新闻详情信息
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(404)
+
+    if not news:
+        abort(404)
+
     # 使用模板
-    return render_template('news/detail.html', user=user)
+    return render_template('news/detail.html',
+                           user=user,
+                           news=news)
