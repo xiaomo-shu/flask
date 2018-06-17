@@ -1,13 +1,74 @@
-from flask import abort
+from flask import abort, jsonify
 from flask import current_app
 from flask import g
 from flask import render_template
+from flask import request
 from flask import session
 
 from info import constants, db
 from info.models import User, News
-from info.utils.commons import login_user_data
+from info.utils.commons import login_user_data, login_required
+from info.utils.response_code import RET
 from . import news_blu
+
+
+@news_blu.route('/collect', methods=['POST'])
+@login_required
+def news_collect():
+    """
+    新闻`收藏`或`取消收藏`
+    1. 接收参数(news_id, action)并进行参数校验
+    2. 根据`news_id`获取新闻的信息(如果查不到，说明新闻不存在)
+    3. 根据action执行对应的操作
+    4. 返回应答，收藏或取消收藏成功
+    """
+    # 获取登录的用户
+    user = g.user
+
+    # 1. 接收参数(news_id, action)并进行参数校验
+    req_dict = request.json
+
+    if not req_dict:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    news_id = req_dict.get('news_id')
+    action = req_dict.get('action')
+
+    if not all([news_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+    if action not in ('do', 'undo'):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 2. 根据`news_id`获取新闻的信息(如果查不到，说明新闻不存在)
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询新闻信息失败')
+
+    if not news:
+        return jsonify(errno=RET.NODATA, errmsg='新闻不存在')
+
+    # 3. 根据action执行对应的操作
+    if action == 'do':
+        # 3.1 如果action=='do', 执行`收藏`操作
+        if news not in user.collection_news:
+            user.collection_news.append(news)
+    else:
+        # 3.2 如果action=='undo', 执行`取消收藏`操作
+        if news in user.collection_news:
+            user.collection_news.remove(news)
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='操作失败')
+
+    # 4. 返回应答，收藏或取消收藏成功
+    return jsonify(errno=RET.OK, errmsg='操作成功')
 
 
 # get_news_detail.__name__
