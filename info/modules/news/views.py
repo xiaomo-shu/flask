@@ -12,6 +12,65 @@ from info.utils.response_code import RET
 from . import news_blu
 
 
+@news_blu.route('/comment/like', methods=['POST'])
+@login_required
+def news_comment_like():
+    """
+    评论点赞或取消点赞:
+    1. 接收参数(comment_id, action)并进行参数校验
+    2. 根据`comment_id`去查询评论的信息(如果查不到，说明评论信息不存在)
+    3. 根据action执行对应的操作
+    4. 返回应答，评论点赞或取消点赞成功
+    """
+    # 1. 接收参数(comment_id, action)并进行参数校验
+    req_dict = request.json
+
+    if not req_dict:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    comment_id = req_dict.get('comment_id')
+    action = req_dict.get('action')
+
+    if not all([comment_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+    if action not in ('do', 'undo'):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 2. 根据`comment_id`去查询评论的信息(如果查不到，说明评论信息不存在)
+    try:
+        comment = Comment.query.get(comment_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询评论信息失败')
+
+    if not comment:
+        return jsonify(errno=RET.NODATA, errmsg='评论信息不存在')
+
+    # 3. 根据action执行对应的操作
+    user = g.user
+    if action == 'do':
+        # 3.1 如果action=='do', 进行`点赞`操作
+        if comment not in user.like_comments:
+            user.like_comments.append(comment)
+            comment.like_count += 1
+    else:
+        # 3.2 如果action=='undo', 进行`取消点赞`操作
+        if comment in user.like_comments:
+            user.like_comments.remove(comment)
+            comment.like_count -= 1
+    
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='操作失败')
+
+    # 4. 返回应答，评论点赞或取消点赞成功
+    return jsonify(errno=RET.OK, errmsg='操作成功')
+
+
 @news_blu.route('/comment', methods=['POST'])
 @login_required
 def save_news_comment():
