@@ -52,7 +52,15 @@ def get_news_detail(news_id):
         db.session.rollback()
         current_app.logger.error(e)
 
+    # 获取`点击排行`的新闻信息
+    rank_news_li = []
+    try:
+        rank_news_li = News.query.order_by(News.clicks.desc()).limit(constants.CLICK_RANK_MAX_NEWS).all()
+    except Exception as e:
+        current_app.logger.error(e)
+
     # 使用模板
     return render_template('news/detail.html',
                            user=user,
-                           news=news)
+                           news=news,
+                           rank_news_li=rank_news_li)
