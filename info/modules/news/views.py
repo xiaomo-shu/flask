@@ -4,7 +4,7 @@ from flask import g
 from flask import render_template
 from flask import session
 
-from info import constants
+from info import constants, db
 from info.models import User, News
 from info.utils.commons import login_user_data
 from . import news_blu
@@ -42,6 +42,15 @@ def get_news_detail(news_id):
 
     if not news:
         abort(404)
+
+    # 新闻`点击量`+1
+    news.clicks += 1
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
 
     # 使用模板
     return render_template('news/detail.html',
