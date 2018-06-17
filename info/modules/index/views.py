@@ -1,10 +1,12 @@
 from flask import current_app, jsonify
+from flask import g
 from flask import render_template
 from flask import request
 from flask import session
 
 from info import constants
 from info.models import User, News, Category
+from info.utils.commons import login_user_data
 from info.utils.response_code import RET
 from . import index_blu
 from info import redis_store
@@ -71,18 +73,22 @@ def get_news_list():
 
 # 2. 使用蓝图对象注册路由
 @index_blu.route('/', methods=['GET', 'POST'])
+@login_user_data
 def index():
     # 尝试从session中获取user_id
-    user_id = session.get('user_id') # 获取不到，返回None
+    # user_id = session.get('user_id') # 获取不到，返回None
+    #
+    # user = None
+    # if user_id:
+    #     # 用户已登录
+    #     try:
+    #         user = User.query.get(user_id)
+    #         user.avatar_url = constants.QINIU_DOMIN_PREFIX + user.avatar_url
+    #     except Exception as e:
+    #         current_app.logger.error(e)
 
-    user = None
-    if user_id:
-        # 用户已登录
-        try:
-            user = User.query.get(user_id)
-            user.avatar_url = constants.QINIU_DOMIN_PREFIX + user.avatar_url
-        except Exception as e:
-            current_app.logger.error(e)
+    # 从g变量中获取user
+    user = g.user
 
     # 获取`点击排行`的新闻信息
     rank_news_li = []
