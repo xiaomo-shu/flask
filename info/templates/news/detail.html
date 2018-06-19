@@ -45,7 +45,7 @@
             <div class="comment_list">
                 <div class="person_pic fl">
                     {# 评论用户头像 #}
-                    <img src="{% if comment.user.avatar_url %}{{ comment.user.avatar_url }}{% else %}/static/news/images/worm.jpg{% endif %}" alt="用户图标">
+                    <img src="{% if comment.user.avatar_url %}{{ qiniu_domain + comment.user.avatar_url }}{% else %}/static/news/images/worm.jpg{% endif %}" alt="用户图标">
                 </div>
                 {# 评论用户名 #}
                 <div class="user_name fl">{{ comment.user.nick_name }}</div>

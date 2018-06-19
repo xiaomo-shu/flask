@@ -30,7 +30,11 @@ def login_user_data(view_func):
             # 用户已登录
             try:
                 user = User.query.get(user_id)
-                user.avatar_url = constants.QINIU_DOMIN_PREFIX + user.avatar_url if user.avatar_url else ''
+                # 这句代码会出现bug，视图中commit的时候会把表中对应的用户的avatar_url改掉
+                # user.avatar_url = constants.QINIU_DOMIN_PREFIX + user.avatar_url if user.avatar_url else ''
+
+                # 给user对象增加一个属性avatar_url_path
+                user.avatar_url_path = constants.QINIU_DOMIN_PREFIX + user.avatar_url if user.avatar_url else ''
 
                 # if user.avatar_url:
                 #     constants.QINIU_DOMIN_PREFIX + user.avatar_url
@@ -61,7 +65,8 @@ def login_required(view_func):
         # 用户已登录
         try:
             user = User.query.get(user_id)
-            user.avatar_url = constants.QINIU_DOMIN_PREFIX + user.avatar_url if user.avatar_url else ''
+            # 给user对象增加一个属性avatar_url_path
+            user.avatar_url_path = constants.QINIU_DOMIN_PREFIX + user.avatar_url if user.avatar_url else ''
         except Exception as e:
             current_app.logger.error(e)
             return jsonify(errno=RET.DBERR, errmsg='获取用户信息失败')

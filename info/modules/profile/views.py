@@ -12,6 +12,15 @@ from info.utils.response_code import RET
 from . import profile_blu
 
 
+# /user/password
+@profile_blu.route('/password')
+def user_password():
+    """
+    用户中心-修改密码页面:
+    """
+    return render_template('news/user_pass_info.html')
+
+
 # /user/avatar
 @profile_blu.route('/avatar', methods=['GET', 'POST'])
 @login_required

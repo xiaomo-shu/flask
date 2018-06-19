@@ -272,4 +272,5 @@ def get_news_detail(news_id):
                            rank_news_li=rank_news_li,
                            is_collected=is_collected,
                            comments_li=comments_li,
-                           like_comments=like_comments)
+                           like_comments=like_comments,
+                           qiniu_domain=constants.QINIU_DOMIN_PREFIX)
