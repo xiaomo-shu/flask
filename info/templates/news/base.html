@@ -22,7 +22,7 @@
                 {# 用户已登录，显示登录用户的信息 #}
                 <div class="user_login fr">
                     <img src="{% if user.avatar_url %}{{ user.avatar_url }}{% else %}../../static/news/images/person01.png{% endif %}" class="lgin_pic">
-                    <a href="../../static/news/html/user.html" id="nick_name">{{ user.nick_name }}</a>
+                    <a href="/user" id="nick_name">{{ user.nick_name }}</a>
                     <a href="javascript:;" id="logout">退出</a>
                 </div>
             {% else %}

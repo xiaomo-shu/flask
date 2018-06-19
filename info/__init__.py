@@ -79,8 +79,10 @@ def create_app(config_name):
     from info.modules.index import index_blu
     from info.modules.passport import passport_blu
     from info.modules.news import news_blu
+    from info.modules.profile import profile_blu
     app.register_blueprint(index_blu)
     app.register_blueprint(passport_blu, url_prefix='/passport')
     app.register_blueprint(news_blu, url_prefix='/news')
+    app.register_blueprint(profile_blu, url_prefix='/user')
 
     return app
