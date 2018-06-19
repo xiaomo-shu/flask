@@ -13,12 +13,45 @@ from . import profile_blu
 
 
 # /user/password
-@profile_blu.route('/password')
+@profile_blu.route('/password', methods=['GET', 'POST'])
+@login_required
 def user_password():
     """
     用户中心-修改密码页面:
     """
-    return render_template('news/user_pass_info.html')
+    if request.method == 'GET':
+        return render_template('news/user_pass_info.html')
+    else:
+        # 进行修改密码的处理
+        # 1. 接收参数并且进行校验
+        req_dict = request.json
+
+        if not req_dict:
+            return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+        old_password = req_dict.get('old_password')
+        new_password = req_dict.get('new_password')
+
+        if not all([old_password, new_password]):
+            return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+        # 2. 判断用户输入旧密码是否正确
+        user = g.user
+        if not user.check_passowrd(old_password):
+            return jsonify(errno=RET.DATAERR, errmsg='旧密码错误')
+
+        # 3. 设置用户的新密码
+        user.password = new_password
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='保存密码失败')
+
+        # 4. 返回应答，修改密码成功
+        return jsonify(errno=RET.OK, errmsg='修改密码成功过')
 
 
 # /user/avatar
