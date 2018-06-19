@@ -12,6 +12,42 @@ from info.utils.response_code import RET
 from . import profile_blu
 
 
+# /user/collection?p=页码
+@profile_blu.route('/collection')
+@login_required
+def user_collection():
+    """
+    用户中心-我的收藏页面:
+    """
+    # 1. 获取页码
+    page = request.args.get('p', 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 2. 获取用户收藏的新闻信息并进行分页处理
+    user = g.user
+    
+    try:
+        pagnation = user.collection_news.paginate(page, constants.USER_COLLECTION_MAX_NEWS, False)
+        news_li = pagnation.items
+        total_page = pagnation.pages
+        current_page = pagnation.page
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询收藏新闻失败')
+
+
+    # 使用模板
+    return render_template('news/user_collection.html',
+                           news_li=news_li,
+                           total_page=total_page,
+                           current_page=current_page)
+
+
 # /user/password
 @profile_blu.route('/password', methods=['GET', 'POST'])
 @login_required
