@@ -193,6 +193,7 @@ $(function(){
             var $this = $(this);
             // 默认点击时代表`点赞`
             var action = 'do';
+
             if(sHandler.indexOf('has_comment_up')>=0)
             {
                 // 如果当前该评论已经是点赞状态，再次点击会进行到此代码块内，代表要取消点赞
@@ -213,6 +214,45 @@ $(function(){
             };
 
             // TODO 请求`点赞`或`取消点赞`
+            $.ajax({
+                url: "/news/comment/like",
+                type: "post",
+                data: JSON.stringify(params),
+                contentType: "application/json",
+                headers: {
+                    "X-CSRFToken": getCookie("csrf_token")
+                },
+                success: function (resp) {
+                    if (resp.errno == "0") {
+                        // 操作成功
+                        // 更新页面上`评论点赞数量`
+                       var like_count = $this.html();
+
+                       if (isNaN(like_count)) {
+                           like_count = 0;
+                       }
+
+                       if (action == 'do') {
+                           // 点赞数+1
+                           like_count = parseInt(like_count) + 1;
+                       }
+                       else {
+                           // 点赞数-1
+                           like_count = parseInt(like_count) - 1;
+                       }
+                       $this.html(like_count);
+                    }
+                    else if (resp.errno == "4101") {
+                        // 用户未登录
+                        $(".login_form_con").show();
+                    }
+                    else
+                    {
+                        // 操作失败
+                        alert(resp.errmsg);
+                    }
+                }
+            })
 
         }
 
