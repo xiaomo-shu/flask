@@ -64,7 +64,7 @@
                 </div>
                 {% endif %}
                 <div class="comment_time fl">{{ comment.create_time }}</div>
-                <a href="javascript:;" class="comment_up fr" data-comment-id="{{ comment.id }}" data-news-id="{{ comment.news_id }}">
+                <a href="javascript:;" class="comment_up {% if comment in like_comments %}has_comment_up{% endif %} fr" data-comment-id="{{ comment.id }}" data-news-id="{{ comment.news_id }}">
                     {{ comment.like_count|default('赞', True) }}
                 </a>
                 <a href="javascript:;" class="comment_reply fr">回复</a>

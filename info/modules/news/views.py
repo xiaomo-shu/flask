@@ -260,10 +260,16 @@ def get_news_detail(news_id):
     except Exception as e:
         current_app.logger.error(e)
 
+    # 获取用户点赞所有评论
+    like_comments = []
+    if user:
+        like_comments = user.like_comments
+
     # 使用模板
     return render_template('news/detail.html',
                            user=user,
                            news=news,
                            rank_news_li=rank_news_li,
                            is_collected=is_collected,
-                           comments_li=comments_li)
+                           comments_li=comments_li,
+                           like_comments=like_comments)
