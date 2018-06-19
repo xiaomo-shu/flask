@@ -10,6 +10,19 @@ from info.utils.response_code import RET
 from . import profile_blu
 
 
+# /user/avatar
+@profile_blu.route('/avatar')
+@login_required
+def user_avatar():
+    """
+    用户中心-个人头像页面:
+    """
+    # 从g变量中获取user
+    user = g.user
+
+    return render_template('news/user_pic_info.html', user=user)
+
+
 # /user/basic
 @profile_blu.route('/basic', methods=['GET', 'POST'])
 @login_required
