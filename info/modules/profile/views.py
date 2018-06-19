@@ -4,14 +4,16 @@ from flask import render_template
 from flask import request
 from flask import session
 
+from info import constants
 from info import db
 from info.utils.commons import login_required
+from info.utils.image_storage import storage
 from info.utils.response_code import RET
 from . import profile_blu
 
 
 # /user/avatar
-@profile_blu.route('/avatar')
+@profile_blu.route('/avatar', methods=['GET', 'POST'])
 @login_required
 def user_avatar():
     """
@@ -20,7 +22,36 @@ def user_avatar():
     # 从g变量中获取user
     user = g.user
 
-    return render_template('news/user_pic_info.html', user=user)
+    if request.method == 'GET':
+        return render_template('news/user_pic_info.html', user=user)
+    else:
+        # 保存上传的用户头像
+        # 1. 获取浏览器上传的头像文件
+        file = request.files.get('avatar')
+
+        if not file:
+            return jsonify(errno=RET.PARAMERR, errmsg='缺少数据')
+
+        # 2. 将头像文件上传到七牛云平台
+        try:
+            key = storage(file.read())
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.THIRDERR, errmsg='上传用户头像失败')
+
+        # 3. 设置数据表中用户的头像地址
+        user.avatar_url = key
+        
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='保存头像记录失败')
+        
+        # 4. 返回应答，上传头像成功
+        avatar_url = constants.QINIU_DOMIN_PREFIX + key
+        return jsonify(errno=RET.OK, errmsg='上传头像成功', avatar_url=avatar_url)
 
 
 # /user/basic
