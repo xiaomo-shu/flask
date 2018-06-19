@@ -40,6 +40,25 @@ $(function () {
         };
         
         // TODO: 请求修改用户密码
+        $.ajax({
+            url: "/user/password",
+            type: "post",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // `修改密码`成功
+                    $(".error_tip").html('修改成功').show();
+                }
+                else {
+                    // `修改密码`失败
+                    $(".error_tip").html(resp.errmsg).show();
+                }
+            }
+        })
 
     })
 });

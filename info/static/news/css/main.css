@@ -1025,7 +1025,7 @@ body{
     top:228px;
     color:#f00;
     font-size:13px;
-    /*display:none;*/
+    display:none;
 }
 
 .error_tip2{
