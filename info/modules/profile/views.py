@@ -7,11 +7,75 @@ from flask import session
 
 from info import constants
 from info import db
-from info.models import Category, News
+from info.models import Category, News, User
 from info.utils.commons import login_required
 from info.utils.image_storage import storage
 from info.utils.response_code import RET
 from . import profile_blu
+
+
+# /user/follow
+@profile_blu.route('/follow')
+@login_required
+def user_follow():
+    """
+    关注和取消关注:
+    1. 接收参数(user_id, action)并进行参数校验
+    2. 根据`user_id`查询被关注用户的信息
+    3. 根据action执行对应的操作
+    4. 返回应答，关注或取消关注成功
+    """
+    # 1. 接收参数(user_id, action)并进行参数校验
+    req_dict = request.json
+
+    if not req_dict:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    user_id = req_dict.get('user_id')
+    action = req_dict.get('action')
+
+    if not all([user_id, action]):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+    try:
+        user_id = int(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    if action not in ('do', 'undo'):
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 2. 根据`user_id`查询被关注用户的信息
+    try:
+        followed_user = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户信息失败')
+
+    if not followed_user:
+        return jsonify(errno=RET.NODATA, errmsg='用户不存在')
+
+    # 3. 根据action执行对应的操作
+    user = g.user
+    if action == 'do':
+        # 关注
+        if user not in followed_user.followers:
+            followed_user.followers.append(user)
+    else:
+        # 取消关注
+        if user in followed_user.followers:
+            followed_user.followers.remove(user)
+
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='操作失败')
+
+    # 4. 返回应答，关注或取消关注成功
+    return jsonify(errno=RET.OK, errmsg='操作成功')
 
 
 # /user/news
