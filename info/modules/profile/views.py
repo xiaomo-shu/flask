@@ -14,6 +14,53 @@ from info.utils.response_code import RET
 from . import profile_blu
 
 
+# /user/<int:user_id>/news?p=<page>
+@profile_blu.route('/<int:user_id>/news')
+@login_required
+def user_others_news(user_id):
+    """
+    查询用户发布的新闻信息:
+    """
+    # 1. 获取页码并进行参数校验
+    page = request.args.get('p', 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 2. 根据`user_id`查询用户的信息
+    try:
+        author = User.query.get(user_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户信息失败')
+
+    if not author:
+        return jsonify(errno=RET.NODATA, errmsg='用户不存在')
+    
+    # 3. 获取作者发布的新闻信息并进行分页
+    try:
+        pagination = author.news_list.paginate(page, constants.OTHER_NEWS_PAGE_MAX_COUNT, False)
+        news_li = pagination.items
+        total_page = pagination.pages
+        current_page = pagination.page
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户发布新闻信息失败')
+
+    news_dict_li = []
+    for news in news_li:
+        news_dict_li.append(news.to_basic_dict())
+    
+    # 4. 返回应答
+    return jsonify(errno=RET.OK, errmsg='OK',
+                   news_li=news_dict_li,
+                   total_page=total_page,
+                   current_page=current_page)
+
+
 # /user/<int:user_id>
 @profile_blu.route('/<int:user_id>')
 @login_required
@@ -21,7 +68,29 @@ def user_others(user_id):
     """
     查看其他用户的页面:
     """
-    return render_template('news/other.html')
+    # 获取登录的用户
+    user = g.user
+
+    # 根据`user_id`查询用户的信息
+    try:
+        author = User.query.get(user_id)
+        author.avatar_url_path = constants.QINIU_DOMIN_PREFIX + author.avatar_url
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    if not author:
+        abort(404)
+
+    # 判断当前登录用户是否关注了author
+    is_followed = False
+    if user in author.followers:
+        is_followed = True
+
+    return render_template('news/other.html',
+                           author=author,
+                           user=user,
+                           is_followed=is_followed)
 
 
 # /user/follows
