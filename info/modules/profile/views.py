@@ -14,6 +14,44 @@ from info.utils.response_code import RET
 from . import profile_blu
 
 
+# /user/follows
+@profile_blu.route('/follows')
+@login_required
+def user_follows():
+    """
+    用户中心-我的关注页面
+    """
+    # 1. 接收参数并进行参数校验
+    page = request.args.get('p', 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+    # 2. 获取用户收藏的新闻信息并进行分页
+    # 获取登录用户
+    user = g.user
+    try:
+        pagination = user.followed.paginate(page, constants.USER_FOLLOWED_MAX_COUNT, False)
+        follows = pagination.items
+        total_page = pagination.pages
+        current_page = pagination.page
+    except Exception as e:
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='查询用户收藏新闻信息失败')
+
+    for followed_user in follows:
+        followed_user.avatar_url_path = constants.QINIU_DOMIN_PREFIX + followed_user.avatar_url
+
+    # 使用模板
+    return render_template('news/user_follow.html',
+                           follows=follows,
+                           total_page=total_page,
+                           current_page=current_page)
+
+
 # /user/follow
 @profile_blu.route('/follow', methods=['POST'])
 @login_required
