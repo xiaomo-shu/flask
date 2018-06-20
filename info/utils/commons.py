@@ -19,6 +19,18 @@ def do_rank_class(index):
     return rank_class_li[index]
 
 
+def do_news_status(status):
+    assert status in [0, 1, -1], 'status必须在(0, 1, -1)中'
+
+    status_dict = {
+        0: '已通过',
+        1: '审核中',
+        -1: '未通过'
+    }
+
+    return status_dict[status]
+
+
 def login_user_data(view_func):
     @functools.wraps(view_func)
     def wrapper(*args, **kwargs):
