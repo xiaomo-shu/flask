@@ -1,7 +1,10 @@
 # 此文件中定义我们自己封装一些代码
 import functools
+
+from flask import abort
 from flask import current_app, jsonify
 from flask import g
+from flask import redirect
 from flask import session
 
 from info import constants
@@ -89,4 +92,30 @@ def login_required(view_func):
 
         return view_func(*args, **kwargs)
 
+    return wrapper
+
+
+def admin_login_required(view_func):
+    @functools.wraps(view_func)
+    def wrapper(*args, **kwargs):
+        # 尝试从session中获取user_id
+        user_id = session.get('user_id')
+        is_admin = session.get('is_admin')
+
+        if not user_id or not is_admin:
+            # 登录用户不是管理员或用户未登录，直接跳转到首页
+            return redirect('/')
+
+        user = None
+        try:
+            user = User.query.get(user_id)
+            user.avatar_url_path = constants.QINIU_DOMIN_PREFIX + user.avatar_url if user.avatar_url else ''
+        except Exception as e:
+            current_app.logger.error(e)
+            abort(500)
+
+        # 使用g变量临时保存user
+        g.user = user
+
+        return view_func(*args, **kwargs)
     return wrapper

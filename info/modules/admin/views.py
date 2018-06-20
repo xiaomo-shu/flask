@@ -7,7 +7,18 @@ from flask import session
 from flask import url_for
 
 from info.models import User
+from info.utils.commons import admin_login_required
 from . import admin_blu
+
+
+# /admin/index
+@admin_blu.route('/index')
+@admin_login_required
+def index():
+    """
+    后台管理首页:
+    """
+    return render_template('admin/index.html')
 
 
 # /admin/login
@@ -55,4 +66,5 @@ def login():
         session['is_admin'] = True
 
         # 5. 登录成功，跳转到后台管理的首页
-        return '后台管理首页'
+        # return '后台管理首页'
+        return redirect(url_for('admin.index'))
