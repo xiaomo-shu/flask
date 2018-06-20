@@ -262,8 +262,13 @@ def get_news_detail(news_id):
 
     # 获取用户点赞所有评论
     like_comments = []
+    is_followed = False
     if user:
         like_comments = user.like_comments
+
+        # 判断当前登录的用户是否关注了新闻作者
+        if user in news.user.followers:
+            is_followed = True
 
     # 使用模板
     return render_template('news/detail.html',
@@ -273,4 +278,5 @@ def get_news_detail(news_id):
                            is_collected=is_collected,
                            comments_li=comments_li,
                            like_comments=like_comments,
-                           qiniu_domain=constants.QINIU_DOMIN_PREFIX)
+                           qiniu_domain=constants.QINIU_DOMIN_PREFIX,
+                           is_followed=is_followed)
