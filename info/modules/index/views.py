@@ -37,7 +37,7 @@ def get_news_list():
         return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
 
     # 2. 根据`分类id`获取新闻的信息并进行分页
-    filters = []
+    filters = [News.status == 0]
     # `最新`
     if category_id != 1:
         # 获取分类新闻的信息
