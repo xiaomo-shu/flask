@@ -20,14 +20,26 @@ $(function () {
                         item["value"] = tinyMCE.activeEditor.getContent();
                     }
                 }
+            },
+            url: '/user/release',
+            type: 'post',
+            headers: {
+                'X-CSRFToken': getCookie('csrf_token')
+            },
+            success: function (resp) {
+                if (resp.errno == '0') {
+                    // 新闻`发布`成功
+                    // 选中索引为6的左边单菜单
+                    window.parent.fnChangeMenu(6);
+                    // 滚动到顶部
+                    window.parent.scrollTo(0, 0);
+                }
+                else {
+                    // `新闻发布`失败
+                    $('.error_tip2').html(resp.errmsg).show();
+                }
             }
 
         });
-
-        // 新闻`发布`成功
-        // 选中索引为6的左边单菜单
-        window.parent.fnChangeMenu(6);
-        // 滚动到顶部
-        window.parent.scrollTo(0, 0);
     })
 });
