@@ -7,7 +7,7 @@ from flask import session
 
 from info import constants
 from info import db
-from info.models import Category
+from info.models import Category, News
 from info.utils.commons import login_required
 from info.utils.image_storage import storage
 from info.utils.response_code import RET
@@ -15,24 +15,81 @@ from . import profile_blu
 
 
 # /user/release
-@profile_blu.route('/release')
+@profile_blu.route('/release', methods=['GET', 'POST'])
 @login_required
 def user_news_release():
     """
     用户中心-发布信息页面:
     """
-    # 获取所有`新闻分类`信息
-    try:
-        categories = Category.query.all()
-    except Exception as e:
-        current_app.logger.error(e)
-        abort(500)
+    if request.method == 'GET':
+        # 获取所有`新闻分类`信息
+        try:
+            categories = Category.query.all()
+        except Exception as e:
+            current_app.logger.error(e)
+            abort(500)
 
-    # 去除`最新`分类
-    categories.pop(0)
+        # 去除`最新`分类
+        categories.pop(0)
 
-    # 使用模板
-    return render_template('news/user_news_release.html', categories=categories)
+        # 使用模板
+        return render_template('news/user_news_release.html', categories=categories)
+    else:
+        # 新闻发布处理
+        # 1. 接收参数并进行参数校验
+        title = request.form.get('title')
+        category_id = request.form.get('category_id')
+        digest = request.form.get('digest')
+        content = request.form.get('content')
+        file = request.files.get('index_image')
+        
+        if not all([title, category_id, digest, content, file]):
+            return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+        
+        try:
+            category_id = int(category_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+        # 2. 根据`category_id`去查询分类的信息
+        try:
+            category = Category.query.get(category_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='查询分类信息失败')
+
+        if not category:
+            return jsonify(errno=RET.NODATA, errmsg='分类信息不存在')
+
+        # 3. 将新闻的索引图片上传至七牛云
+        try:
+            key = storage(file.read())
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.THIRDERR, errmsg='上传图片失败')
+
+        # 4. 创建News对象并保存新闻的信息
+        news = News()
+        news.title = title
+        news.source = '个人发布'
+        news.digest = digest
+        news.content = content
+        news.index_image_url = constants.QINIU_DOMIN_PREFIX + key
+        news.category_id = category_id
+        news.user_id = g.user.id
+        news.status = 1 # 审核中
+
+        try:
+            db.session.add(news)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='保存新闻信息失败')
+
+        # 5. 返回应答，新闻发布成功
+        return jsonify(errno=RET.OK, errmsg='新闻发布成功')
 
 
 # /user/collection?p=页码
