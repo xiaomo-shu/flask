@@ -15,7 +15,7 @@
         <ul class="article_list">
             {# 遍历显示用户收藏的所有新闻信息 #}
             {% for news in news_li %}
-                <li><a href="/news/{{ news.id }}">{{ news.title }}</a><span>{{ news.create_time }}</span></li>
+                <li><a href="/news/{{ news.id }}" target="_blank">{{ news.title }}</a><span>{{ news.create_time }}</span></li>
             {% endfor %}
         </ul>
 
@@ -27,7 +27,7 @@
                     currentPage: {{ current_page }}, // 当前页
                     totalPage: {{ total_page }}, // 总页数
                     callback: function(current) {
-                        location.href = '/user/collection?p=' + current;
+                        window.location.href = '/user/collection?p=' + current;
                     }
                 });
             });

@@ -1,3 +1,4 @@
+from flask import abort
 from flask import current_app
 from flask import g, jsonify
 from flask import render_template
@@ -6,10 +7,32 @@ from flask import session
 
 from info import constants
 from info import db
+from info.models import Category
 from info.utils.commons import login_required
 from info.utils.image_storage import storage
 from info.utils.response_code import RET
 from . import profile_blu
+
+
+# /user/release
+@profile_blu.route('/release')
+@login_required
+def user_news_release():
+    """
+    用户中心-发布信息页面:
+    """
+    # 获取所有`新闻分类`信息
+    try:
+        categories = Category.query.all()
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    # 去除`最新`分类
+    categories.pop(0)
+
+    # 使用模板
+    return render_template('news/user_news_release.html', categories=categories)
 
 
 # /user/collection?p=页码
