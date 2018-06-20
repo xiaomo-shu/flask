@@ -2,6 +2,8 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 import redis
+from flask import g
+from flask import render_template
 from flask import session
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -75,6 +77,16 @@ def create_app(config_name):
     from info.utils.commons import do_rank_class, do_news_status
     app.add_template_filter(do_rank_class, 'rank_class')
     app.add_template_filter(do_news_status, 'news_status')
+
+    from info.utils.commons import login_user_data
+
+    # 自定义处理404错误
+    @app.errorhandler(404)
+    @login_user_data
+    def handle_page_not_found(e):
+        # 从g变量中获取user
+        user = g.user
+        return render_template('news/404.html', user=user)
 
     # 3. 使用app对象注册蓝图
     from info.modules.index import index_blu
