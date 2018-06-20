@@ -82,8 +82,8 @@
         <div class="rank_con fr">
             <div class="author_card">
                 {# 详情页新闻作者信息展示 #}
-                <a href="#" class="author_pic"><img src="{% if news.user.avatar_url %}{{ qiniu_domain + news.user.avatar_url }}{% else %}../../static/news/images/user_pic.png{% endif %}" alt="author_pic"></a>
-                <a href="#" class="author_name">{{ news.user.nick_name }}</a>
+                <a href="/user/{{ news.user.id }}" class="author_pic"><img src="{% if news.user.avatar_url %}{{ qiniu_domain + news.user.avatar_url }}{% else %}../../static/news/images/user_pic.png{% endif %}" alt="author_pic"></a>
+                <a href="/user/{{ news.user.id }}" class="author_name">{{ news.user.nick_name }}</a>
                 <div class="author_resume">{{ news.user.signature }}</div>
                 <div class="writings"><span>总篇数</span><b>{{ news.user.news_list.count() }}</b></div>
                 <div class="follows"><span>粉丝</span><b>{{ news.user.followers.count() }}</b></div>

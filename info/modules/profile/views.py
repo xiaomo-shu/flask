@@ -14,6 +14,16 @@ from info.utils.response_code import RET
 from . import profile_blu
 
 
+# /user/<int:user_id>
+@profile_blu.route('/<int:user_id>')
+@login_required
+def user_others(user_id):
+    """
+    查看其他用户的页面:
+    """
+    return render_template('news/other.html')
+
+
 # /user/follows
 @profile_blu.route('/follows')
 @login_required
