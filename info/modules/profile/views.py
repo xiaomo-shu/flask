@@ -15,7 +15,7 @@ from . import profile_blu
 
 
 # /user/follow
-@profile_blu.route('/follow')
+@profile_blu.route('/follow', methods=['POST'])
 @login_required
 def user_follow():
     """

@@ -87,8 +87,8 @@
                 <div class="author_resume">{{ news.user.signature }}</div>
                 <div class="writings"><span>总篇数</span><b>{{ news.user.news_list.count() }}</b></div>
                 <div class="follows"><span>粉丝</span><b>{{ news.user.followers.count() }}</b></div>
-                <a href="javascript:;" class="focus fr"  style="display: {% if is_followed %}none;{% else %}block;{% endif %}">关注</a>
-                <a href="javascript:;" class="focused fr" style="display: {% if is_followed %}block;{% else %}none;{% endif %}"><span class="out">已关注</span><span class="over">取消关注</span></a>
+                <a href="javascript:;" class="focus fr"  data-user-id="{{ news.user.id }}" style="display: {% if is_followed %}none;{% else %}block;{% endif %}">关注</a>
+                <a href="javascript:;" class="focused fr" data-user-id="{{ news.user.id }}" style="display: {% if is_followed %}block;{% else %}none;{% endif %}"><span class="out">已关注</span><span class="over">取消关注</span></a>
             </div>            
             <div class="rank_title">
                 <h3>点击排行</h3>

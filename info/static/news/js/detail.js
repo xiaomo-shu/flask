@@ -343,11 +343,91 @@ $(function(){
 
     // 关注当前新闻作者
     $(".focus").click(function () {
+        // 获取参数
+        var user_id = $(this).attr("data-user-id");
+        var action = "do";
 
+        // 组织参数
+        var params = {
+            "user_id": user_id,
+            "action": action
+        };
+
+        // 请求关注当前新闻作者
+        $.ajax({
+            url: "/user/follow",
+            type: "post",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // `关注`成功
+                    // 隐藏`关注`按钮
+                    $(".focus").hide();
+                    // 显示`已关注`按钮
+                    $(".focused").show();
+
+                    // 设置页面上作者粉丝数量
+                    var count = $(".follows b").html();
+                    $(".follows b").html(parseInt(count)+1);
+                }
+                else if (resp.errno == "4101") {
+                    // 用户未登录
+                    $(".login_form_con").show();
+                }
+                else {
+                    // `关注`失败
+                    alert(resp.errmsg);
+                }
+            }
+        })
     });
 
     // 取消关注当前新闻作者
     $(".focused").click(function () {
+          // 获取参数
+        var user_id = $(this).attr("data-user-id");
+        var action = "undo";
 
+        // 组织参数
+        var params = {
+            "user_id": user_id,
+            "action": action
+        };
+
+        // 请求关注当前新闻作者
+        $.ajax({
+            url: "/user/follow",
+            type: "post",
+            data: JSON.stringify(params),
+            contentType: "application/json",
+            headers: {
+                "X-CSRFToken": getCookie("csrf_token")
+            },
+            success: function (resp) {
+                if (resp.errno == "0") {
+                    // `关注`成功
+                    // 显示`关注`按钮
+                    $(".focus").show();
+                    // 隐藏`已关注`按钮
+                    $(".focused").hide();
+
+                    // 设置页面上作者粉丝数量
+                    var count = $(".follows b").html();
+                    $(".follows b").html(parseInt(count)-1);
+                }
+                else if (resp.errno == "4101") {
+                    // 用户未登录
+                    $(".login_form_con").show();
+                }
+                else {
+                    // `关注`失败
+                    alert(resp.errmsg);
+                }
+            }
+        })
     });
 });
