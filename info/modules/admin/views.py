@@ -20,6 +20,45 @@ from info import db
 from sqlalchemy import extract
 
 
+@admin_blu.route('/news/edit')
+@admin_login_required
+def news_edit():
+    """
+    后台管理新闻编辑页面:
+    """
+    # 1. 获取参数并进行校验
+    page = request.args.get('p', 1)
+    key = request.args.get('key')
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(404)
+
+    # 2. 获取所有新闻信息
+    filters = []
+
+    if key:
+        filters.append(News.title.contains(key))
+
+    try:
+        pagination = News.query.filter(*filters). \
+            order_by(News.create_time.desc()). \
+            paginate(page, constants.ADMIN_NEWS_PAGE_MAX_COUNT, False)
+        news_li = pagination.items
+        total_page = pagination.pages
+        current_page = pagination.page
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    return render_template('admin/news_edit.html',
+                           news_li=news_li,
+                           total_page=total_page,
+                           current_page=current_page)
+
+
 @admin_blu.route('/news/review/<int:news_id>', methods=['GET', 'POST'])
 @admin_login_required
 def news_review_detail(news_id):
