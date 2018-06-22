@@ -11,7 +11,7 @@ from flask import session
 from flask import url_for
 
 from info import constants
-from info.models import User, News
+from info.models import User, News, Category
 from info.utils.commons import admin_login_required
 from info.utils.response_code import RET
 from . import admin_blu
@@ -20,11 +20,44 @@ from info import db
 from sqlalchemy import extract
 
 
+@admin_blu.route('/news/edit/<int:news_id>')
+@admin_login_required
+def news_edit_detail(news_id):
+    """
+    后台管理-新闻编辑详情页面:
+    """
+    # 1. 根据`news_id`查询新闻信息
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    if not news:
+        # 新闻信息不存在
+        abort(404)
+
+    # 2. 获取所有分类的信息
+    try:
+        categories = Category.query.all()
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    # 去除最新分类
+    categories.pop(0)
+
+    # 3. 使用模板
+    return render_template('admin/news_edit_detail.html',
+                           news=news,
+                           categories=categories)
+
+
 @admin_blu.route('/news/edit')
 @admin_login_required
 def news_edit():
     """
-    后台管理新闻编辑页面:
+    后台管理-新闻编辑页面:
     """
     # 1. 获取参数并进行校验
     page = request.args.get('p', 1)

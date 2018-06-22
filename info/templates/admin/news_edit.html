@@ -3,11 +3,11 @@
 <head>
 	<meta charset="UTF-8">
 	<title>新经资讯后台管理</title>
-	<link rel="stylesheet" type="text/css" href="../../static/admin/css/reset.css">
-	<link rel="stylesheet" type="text/css" href="../../static/admin/css/main.css">
-	<link rel="stylesheet" href="../../static/admin/css/jquery.pagination.css">
-	<script type="text/javascript" src="../../static/admin/js/jquery-1.12.4.min.js"></script>
-	<script type="text/javascript" src="../../static/admin/js/jquery.pagination.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/admin/css/reset.css">
+	<link rel="stylesheet" type="text/css" href="/static/admin/css/main.css">
+	<link rel="stylesheet" href="/static/admin/css/jquery.pagination.css">
+	<script type="text/javascript" src="/static/admin/js/jquery-1.12.4.min.js"></script>
+	<script type="text/javascript" src="/static/admin/js/jquery.pagination.min.js"></script>
 </head>
 <body>
 	<div class="breadcrub">
@@ -33,7 +33,7 @@
                     <td class="tleft">{{ news.title }}</td>
                     <td>{{ news.create_time }}</td>
                     <td>
-                        <a href="../../static/admin/news_edit_detail.html" class="edit">编辑</a>
+                        <a href="/admin/news/edit/{{ news.id }}" class="edit">编辑</a>
                     </td>
                 </tr>
                 {% endfor %}
