@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+from flask import abort
 from flask import current_app, jsonify
 from flask import flash
 from flask import g
@@ -9,6 +10,7 @@ from flask import request
 from flask import session
 from flask import url_for
 
+from info import constants
 from info.models import User
 from info.utils.commons import admin_login_required
 from info.utils.response_code import RET
@@ -16,6 +18,39 @@ from . import admin_blu
 
 from info import db
 from sqlalchemy import extract
+
+
+@admin_blu.route('/user/list')
+@admin_login_required
+def user_list():
+    """
+    后台管理用户列表信息页面:
+    """
+    # 1. 获取参数并进行校验
+    page = request.args.get('p', 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(404)
+
+    # 2. 获取所有普通用户信息并进行分页
+    try:
+        pagination = User.query.order_by(User.create_time.desc()).\
+            paginate(page, constants.ADMIN_USER_PAGE_MAX_COUNT, False)
+        users = pagination.items
+        total_page = pagination.pages
+        current_page = pagination.page
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    # 3. 使用模板文件
+    return render_template('admin/user_list.html',
+                           users=users,
+                           total_page=total_page,
+                           current_page=current_page)
 
 
 # /admin/user/count
