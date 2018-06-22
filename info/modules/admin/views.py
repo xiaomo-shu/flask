@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask import current_app, jsonify
 from flask import flash
 from flask import g
@@ -12,6 +14,9 @@ from info.utils.commons import admin_login_required
 from info.utils.response_code import RET
 from . import admin_blu
 
+from info import db
+from sqlalchemy import extract
+
 
 # /admin/user/count
 @admin_blu.route('/user/count')
@@ -20,7 +25,27 @@ def user_count():
     """
     后台管理-用户统计页面:
     """
-    return render_template('admin/user_count.html')
+    # 统计网站用户的总数
+    total_count = User.query.count()
+
+    # 统计当月用户的新增数量
+    now_date = datetime.now()
+    year = now_date.year
+    month = now_date.month
+
+    month_count = db.session.query(User).filter(extract('year', User.create_time) == year,
+                                                extract('month', User.create_time) == month).count()
+
+    # 统计当天用户的新增数量
+    day = now_date.day
+    day_count = db.session.query(User).filter(extract('year', User.create_time) == year,
+                                              extract('month', User.create_time) == month,
+                                              extract('day', User.create_time) == day).count()
+
+    return render_template('admin/user_count.html',
+                           total_count=total_count,
+                           month_count=month_count,
+                           day_count=day_count)
 
 
 # /admin/logout
@@ -39,7 +64,6 @@ def logout():
 
     # 2. 返回应答，退出成功
     return jsonify(errno=RET.OK, errmsg='退出成功')
-
 
 
 # /admin/index
