@@ -21,7 +21,7 @@ from info import db
 from sqlalchemy import extract
 
 
-@admin_blu.route('/news/types/edit')
+@admin_blu.route('/news/types/edit', methods=['POST'])
 @admin_login_required
 def news_type_edit():
     """
@@ -33,7 +33,7 @@ def news_type_edit():
     if not req_dict:
         return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
 
-    category_id = req_dict.get('category_id')
+    category_id = req_dict.get('id')
     name = req_dict.get('name')
 
     if not name:
