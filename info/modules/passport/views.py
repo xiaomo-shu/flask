@@ -9,6 +9,7 @@ from flask import session
 
 from info import constants, db
 from info.models import User
+from info.utils.commons import login_required
 from info.utils.response_code import RET
 from . import passport_blu
 

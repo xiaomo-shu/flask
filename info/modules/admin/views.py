@@ -13,6 +13,16 @@ from info.utils.response_code import RET
 from . import admin_blu
 
 
+# /admin/user/count
+@admin_blu.route('/user/count')
+@admin_login_required
+def user_count():
+    """
+    后台管理-用户统计页面:
+    """
+    return render_template('admin/user_count.html')
+
+
 # /admin/logout
 @admin_blu.route('/logout', methods=['POST'])
 def logout():
