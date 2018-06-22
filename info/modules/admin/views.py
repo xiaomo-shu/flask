@@ -13,6 +13,7 @@ from flask import url_for
 from info import constants
 from info.models import User, News, Category
 from info.utils.commons import admin_login_required
+from info.utils.image_storage import storage
 from info.utils.response_code import RET
 from . import admin_blu
 
@@ -26,31 +27,87 @@ def news_edit_detail(news_id):
     """
     后台管理-新闻编辑详情页面:
     """
-    # 1. 根据`news_id`查询新闻信息
-    try:
-        news = News.query.get(news_id)
-    except Exception as e:
-        current_app.logger.error(e)
-        abort(500)
+    if request.method == 'GET':
+        # 1. 根据`news_id`查询新闻信息
+        try:
+            news = News.query.get(news_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            abort(500)
 
-    if not news:
-        # 新闻信息不存在
-        abort(404)
+        if not news:
+            # 新闻信息不存在
+            abort(404)
 
-    # 2. 获取所有分类的信息
-    try:
-        categories = Category.query.all()
-    except Exception as e:
-        current_app.logger.error(e)
-        abort(500)
+        # 2. 获取所有分类的信息
+        try:
+            categories = Category.query.all()
+        except Exception as e:
+            current_app.logger.error(e)
+            abort(500)
 
-    # 去除最新分类
-    categories.pop(0)
+        # 去除最新分类
+        categories.pop(0)
 
-    # 3. 使用模板
-    return render_template('admin/news_edit_detail.html',
-                           news=news,
-                           categories=categories)
+        # 3. 使用模板
+        return render_template('admin/news_edit_detail.html',
+                               news=news,
+                               categories=categories)
+    else:
+        # 执行编辑处理
+        # 1. 接收参数并进行参数校验
+        title = request.form.get("title")
+        digest = request.form.get("digest")
+        content = request.form.get("content")
+        index_image = request.files.get("index_image")
+        category_id = request.form.get("category_id")
+
+        if not all([title, digest, content, category_id]):
+            return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+        try:
+            category_id = int(category_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+        # 2. 根据`news_id`获取新闻信息
+        try:
+            news = News.query.get(news_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='查询新闻信息失败')
+
+        if not news:
+            # 没有这个新闻
+            return jsonify(errno=RET.NODATA, errmsg='新闻信息不存在')
+
+        # 3. 如果上传了索引图片，将图片上传至七牛云平台
+        if index_image:
+            try:
+                key = storage(index_image.read())
+            except Exception as e:
+                current_app.logger.error(e)
+                return jsonify(errno=RET.THIRDERR, errmsg='上传文件到七牛云失败')
+
+        # 4. 设置新闻的信息并保存
+        news.title = title
+        news.digest = digest
+        news.content = content
+        news.category_id = category_id
+
+        if index_image:
+            news.index_image_url = constants.QINIU_DOMIN_PREFIX + key
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='保存新闻信息失败')
+
+        # 5. 返回应答，编辑成功
+        return jsonify(errno=RET.OK, errmsg='编辑成功')
 
 
 @admin_blu.route('/news/edit')
