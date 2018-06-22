@@ -20,25 +20,76 @@ from info import db
 from sqlalchemy import extract
 
 
-@admin_blu.route('/news/review/<int:news_id>')
+@admin_blu.route('/news/review/<int:news_id>', methods=['GET', 'POST'])
 @admin_login_required
 def news_review_detail(news_id):
     """
     后台管理-新闻审核详情页面:
     """
-    # 1. 根据`news_id`获取新闻信息
-    try:
-        news = News.query.get(news_id)
-    except Exception as e:
-        current_app.logger.error(e)
-        abort(500)
+    if request.method == 'GET':
+        # 1. 根据`news_id`获取新闻信息
+        try:
+            news = News.query.get(news_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            abort(500)
 
-    if not news:
-        # 没有这个新闻
-        abort(404)
+        if not news:
+            # 没有这个新闻
+            abort(404)
+        # 2. 使用模板
+        return render_template('admin/news_review_detail.html', news=news)
+    else:
+        # 执行审核操作
+        # 1. 获取参数并进行参数校验
+        req_dict = request.json
+        if not req_dict:
+            return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
 
-    # 2. 使用模板
-    return render_template('admin/news_review_detail.html', news=news)
+        action = req_dict.get('action')
+
+        if not action:
+            return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+        if action not in ('accept', 'reject'):
+            return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+        # 2. 根据`news_id`获取新闻信息
+        try:
+            news = News.query.get(news_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='查询新闻信息失败')
+
+        if not news:
+            # 没有这个新闻
+            return jsonify(errno=RET.NODATA, errmsg='新闻信息不存在')
+
+        # 3. 根据action执行对应的操作:
+        if action == 'accept':
+            # 审核通过
+            news.status = 0
+        else:
+            # 拒绝通过
+            news.status = -1
+            
+            # 获取拒绝原因
+            reason = req_dict.get('reason')
+            
+            if not reason:
+                return jsonify(errno=RET.PARAMERR, errmsg='缺少拒绝原因')
+
+            news.reason = reason
+            
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='操作失败')
+        
+        # 4. 返回应答，审核成功
+        return jsonify(errno=RET.OK, errmsg='审核成功')
 
 
 @admin_blu.route('/news/review')
