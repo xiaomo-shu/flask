@@ -1,4 +1,4 @@
-from flask import current_app
+from flask import current_app, jsonify
 from flask import flash
 from flask import g
 from flask import redirect
@@ -9,7 +9,27 @@ from flask import url_for
 
 from info.models import User
 from info.utils.commons import admin_login_required
+from info.utils.response_code import RET
 from . import admin_blu
+
+
+# /admin/logout
+@admin_blu.route('/logout', methods=['POST'])
+def logout():
+    """
+    管理员退出登录:
+    1. 清除session对应的登录信息
+    2. 返回应答，退出成功
+    """
+    # 1. 清除session对应的登录信息
+    session.pop('user_id')
+    session.pop('mobile')
+    session.pop('nick_name')
+    session.pop('is_admin')
+
+    # 2. 返回应答，退出成功
+    return jsonify(errno=RET.OK, errmsg='退出成功')
+
 
 
 # /admin/index
