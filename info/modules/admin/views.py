@@ -20,6 +20,27 @@ from info import db
 from sqlalchemy import extract
 
 
+@admin_blu.route('/news/review/<int:news_id>')
+@admin_login_required
+def news_review_detail(news_id):
+    """
+    后台管理-新闻审核详情页面:
+    """
+    # 1. 根据`news_id`获取新闻信息
+    try:
+        news = News.query.get(news_id)
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    if not news:
+        # 没有这个新闻
+        abort(404)
+
+    # 2. 使用模板
+    return render_template('admin/news_review_detail.html', news=news)
+
+
 @admin_blu.route('/news/review')
 @admin_login_required
 def news_review():
