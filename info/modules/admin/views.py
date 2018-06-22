@@ -11,7 +11,7 @@ from flask import session
 from flask import url_for
 
 from info import constants
-from info.models import User
+from info.models import User, News
 from info.utils.commons import admin_login_required
 from info.utils.response_code import RET
 from . import admin_blu
@@ -20,11 +20,44 @@ from info import db
 from sqlalchemy import extract
 
 
+@admin_blu.route('/news/review')
+@admin_login_required
+def news_review():
+    """
+    后台管理-新闻审核列表页面:
+    """
+    # 1. 获取参数并进行校验
+    page = request.args.get('p', 1)
+
+    try:
+        page = int(page)
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(404)
+
+    # 2. 获取所有新闻的信息并进行分页
+    try:
+        pagination = News.query.order_by(News.create_time.desc()).\
+                        paginate(page, constants.ADMIN_NEWS_PAGE_MAX_COUNT, False)
+        news_li = pagination.items
+        total_page = pagination.pages
+        current_page = pagination.page
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    # 3. 使用模板
+    return render_template('admin/news_review.html',
+                           news_li=news_li,
+                           total_page=total_page,
+                           current_page=current_page)
+
+
 @admin_blu.route('/user/list')
 @admin_login_required
 def user_list():
     """
-    后台管理用户列表信息页面:
+    后台管理-用户列表信息页面:
     """
     # 1. 获取参数并进行校验
     page = request.args.get('p', 1)
