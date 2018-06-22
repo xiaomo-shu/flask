@@ -21,7 +21,7 @@ from info import db
 from sqlalchemy import extract
 
 
-@admin_blu.route('/news/edit/<int:news_id>')
+@admin_blu.route('/news/edit/<int:news_id>', methods=['GET', 'POST'])
 @admin_login_required
 def news_edit_detail(news_id):
     """
