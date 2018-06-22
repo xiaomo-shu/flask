@@ -21,6 +21,26 @@ from info import db
 from sqlalchemy import extract
 
 
+@admin_blu.route('/news/types')
+@admin_login_required
+def news_types():
+    """
+    后台管理-分类页面显示:
+    """
+    # 获取所有分类的信息
+    try:
+        categories = Category.query.all()
+    except Exception as e:
+        current_app.logger.error(e)
+        abort(500)
+
+    # 去除最新分类
+    categories.pop(0)
+
+    # 使用模板
+    return render_template('admin/news_type.html', categories=categories)
+
+
 @admin_blu.route('/news/edit/<int:news_id>', methods=['GET', 'POST'])
 @admin_login_required
 def news_edit_detail(news_id):
