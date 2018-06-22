@@ -28,6 +28,7 @@ def news_review():
     """
     # 1. 获取参数并进行校验
     page = request.args.get('p', 1)
+    key = request.args.get('key')
 
     try:
         page = int(page)
@@ -36,9 +37,15 @@ def news_review():
         abort(404)
 
     # 2. 获取所有新闻的信息并进行分页
+    filters = []
+    if key:
+        filters.append(News.title.contains(key))
+
     try:
-        pagination = News.query.order_by(News.create_time.desc()).\
-                        paginate(page, constants.ADMIN_NEWS_PAGE_MAX_COUNT, False)
+        pagination = News.query.filter(*filters). \
+            order_by(News.create_time.desc()). \
+            paginate(page, constants.ADMIN_NEWS_PAGE_MAX_COUNT, False)
+
         news_li = pagination.items
         total_page = pagination.pages
         current_page = pagination.page
@@ -70,7 +77,7 @@ def user_list():
 
     # 2. 获取所有普通用户信息并进行分页
     try:
-        pagination = User.query.order_by(User.create_time.desc()).\
+        pagination = User.query.order_by(User.create_time.desc()). \
             paginate(page, constants.ADMIN_USER_PAGE_MAX_COUNT, False)
         users = pagination.items
         total_page = pagination.pages
