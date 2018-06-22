@@ -28,6 +28,10 @@ function getNewsList(page) {
     // 获取作者id
     var user_id = $(".user_menu_con").attr("data-user-id");
 
+    // $.get("/user/" + user_id + '/news?p=' + page, function (resp) {
+    //
+    // });
+
     $.ajax({
         url: "/user/" + user_id + '/news?p=' + page,
         type: "get",

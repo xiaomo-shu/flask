@@ -80,6 +80,7 @@
 {% endblock content %}
 {% block rank_con %}
         <div class="rank_con fr">
+            {% if news.user %}
             <div class="author_card">
                 {# 详情页新闻作者信息展示 #}
                 <a href="/user/{{ news.user.id }}" class="author_pic"><img src="{% if news.user.avatar_url %}{{ qiniu_domain + news.user.avatar_url }}{% else %}../../static/news/images/user_pic.png{% endif %}" alt="author_pic"></a>
@@ -89,7 +90,8 @@
                 <div class="follows"><span>粉丝</span><b>{{ news.user.followers.count() }}</b></div>
                 <a href="javascript:;" class="focus fr"  data-user-id="{{ news.user.id }}" style="display: {% if is_followed %}none;{% else %}block;{% endif %}">关注</a>
                 <a href="javascript:;" class="focused fr" data-user-id="{{ news.user.id }}" style="display: {% if is_followed %}block;{% else %}none;{% endif %}"><span class="out">已关注</span><span class="over">取消关注</span></a>
-            </div>            
+            </div>
+            {% endif %}
             <div class="rank_title">
                 <h3>点击排行</h3>
             </div>

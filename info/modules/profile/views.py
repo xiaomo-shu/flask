@@ -42,7 +42,7 @@ def user_others_news(user_id):
     
     # 3. 获取作者发布的新闻信息并进行分页
     try:
-        pagination = author.news_list.paginate(page, constants.OTHER_NEWS_PAGE_MAX_COUNT, False)
+        pagination = author.news_list.filter(News.status == 0).paginate(page, constants.OTHER_NEWS_PAGE_MAX_COUNT, False)
         news_li = pagination.items
         total_page = pagination.pages
         current_page = pagination.page

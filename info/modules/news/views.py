@@ -267,7 +267,7 @@ def get_news_detail(news_id):
         like_comments = user.like_comments
 
         # 判断当前登录的用户是否关注了新闻作者
-        if user in news.user.followers:
+        if news.user and (user in news.user.followers):
             is_followed = True
 
     # 使用模板

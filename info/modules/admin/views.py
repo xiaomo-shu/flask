@@ -1,5 +1,6 @@
 from flask import current_app
 from flask import flash
+from flask import g
 from flask import redirect
 from flask import render_template
 from flask import request
@@ -18,7 +19,10 @@ def index():
     """
     后台管理首页:
     """
-    return render_template('admin/index.html')
+    # 获取当前登录用户user
+    user = g.user
+
+    return render_template('admin/index.html', user=user)
 
 
 # /admin/login
@@ -29,6 +33,13 @@ def login():
     """
     if request.method == 'GET':
         # 显示页面
+        user_id = session.get('user_id')
+        is_admin = session.get('is_admin')
+
+        if user_id and is_admin:
+            # 管理员已登录
+            return redirect(url_for('admin.index'))
+
         return render_template('admin/login.html')
     else:
         # 进行登录处理
