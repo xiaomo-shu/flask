@@ -21,6 +21,62 @@ from info import db
 from sqlalchemy import extract
 
 
+@admin_blu.route('/news/types/edit')
+@admin_login_required
+def news_type_edit():
+    """
+    后台管理-分类信息添加或修改:
+    """
+    # 1. 获取数据并进行数据校验
+    req_dict = request.json
+
+    if not req_dict:
+        return jsonify(errno=RET.PARAMERR, errmsg='缺少参数')
+
+    category_id = req_dict.get('category_id')
+    name = req_dict.get('name')
+
+    if not name:
+        return jsonify(errno=RET.PARAMERR, errmsg='参数不完整')
+
+    # 2. 根据category_id获取分类信息
+    if category_id:
+        try:
+            category_id = int(category_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.PARAMERR, errmsg='参数错误')
+
+        try:
+            category = Category.query.get(category_id)
+        except Exception as e:
+            current_app.logger.error(e)
+            return jsonify(errno=RET.DBERR, errmsg='查询分类信息失败')
+
+        if not category:
+            return jsonify(errno=RET.NODATA, errmsg='分类信息不存在')
+
+    # 3. 执行添加或者修改操作
+    if category_id:
+        # 修改
+        category.name = name
+    else:
+        # 添加
+        category = Category()
+        category.name = name
+        
+    try:
+        db.session.add(category)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(e)
+        return jsonify(errno=RET.DBERR, errmsg='操作失败')
+
+    # 4. 返回应答，操作成功
+    return jsonify(errno=RET.OK, errmsg='操作成功')
+
+
 @admin_blu.route('/news/types')
 @admin_login_required
 def news_types():
